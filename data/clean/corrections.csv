@@ -1,0 +1,124 @@
+dataset,year,region,field,original,cleaned,action,reason
+herbivores,1983,,count_horses,,,kept empty,species not yet present (horses introduced 1984)
+herbivores,1983,,count_deer,,,kept empty,deer introduced/counted only from 1992
+herbivores,1984,,count_deer,,,kept empty,deer introduced/counted only from 1992
+herbivores,1985,,count_deer,,,kept empty,deer introduced/counted only from 1992
+herbivores,1986,,count_deer,,,kept empty,deer introduced/counted only from 1992
+herbivores,1987,,count_deer,,,kept empty,deer introduced/counted only from 1992
+herbivores,1988,,count_deer,,,kept empty,deer introduced/counted only from 1992
+herbivores,1989,,count_deer,,,kept empty,deer introduced/counted only from 1992
+herbivores,1990,,count_deer,,,kept empty,deer introduced/counted only from 1992
+herbivores,1991,,count_deer,,,kept empty,deer introduced/counted only from 1992
+herbivores,2016,,count_cattle,180,180,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2016,,count_horses,940,940,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2016,,count_deer,3380,3380,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2017,,count_cattle,230,230,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2017,,count_horses,1050,1050,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2017,,count_deer,3950,3950,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2018,,count_cattle,200,200,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2018,,count_horses,610,610,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2018,,deaths_deer,1),,removed,"footnote marker, not a number; moved to 'note' column (Winter 2017-2018: a great part of the population died)"
+herbivores,2018,,count_deer,2320,2320,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2019,,count_cattle,280,280,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2019,,count_horses,490,490,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2019,,deaths_deer,2),,removed,"footnote marker, not a number; moved to 'note' column (1785 deer shot between December 2018 and October 2019)"
+herbivores,2019,,count_deer,1525,1525,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2020,,count_cattle,340,340,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2020,,count_horses,420,420,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2020,,count_deer,2400,2400,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2021,,count_cattle,380,380,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2021,,count_horses,280,280,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2021,,deaths_deer,3),,removed,"footnote marker, not a number; moved to 'note' column (560 horses moved to other reserves between 2018 and 2021)"
+herbivores,2021,,count_deer,1900,1900,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2022,,count_cattle,400,400,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2022,,count_horses,330,330,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2022,,deaths_deer,4),,removed,"footnote marker, not a number; moved to 'note' column (1800 deer shot between July 2022 and May 2023)"
+herbivores,2022,,count_deer,2100,2100,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2023,,count_cattle,345,345,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2023,,count_horses,380,380,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2023,,deaths_deer,4),,removed,"footnote marker, not a number; moved to 'note' column (1800 deer shot between July 2022 and May 2023)"
+herbivores,2023,,count_deer,860,860,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2024,,count_cattle,375,375,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2024,,count_horses,350,350,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,2024,,count_deer,870,870,flagged,blue font in source: 'not always 100% trustworthy'
+herbivores,1987,,balance_cattle,,20,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1989,,balance_cattle,,20,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1990,,balance_cattle,,-5,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1991,,balance_cattle,,5,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1992,,balance_cattle,,-5,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1994,,balance_cattle,,5,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1998,,balance_cattle,,-5,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1999,,balance_cattle,,-5,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2000,,balance_cattle,,-10,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2001,,balance_cattle,,-15,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2002,,balance_cattle,,-10,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2003,,balance_cattle,,-16,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2004,,balance_cattle,,6,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2005,,balance_cattle,,10,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2006,,balance_cattle,,30,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2007,,balance_cattle,,10,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2008,,balance_cattle,,-50,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2009,,balance_cattle,,40,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2010,,balance_cattle,,50,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2011,,balance_cattle,,25,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2012,,balance_cattle,,60,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2013,,balance_cattle,,60,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2014,,balance_cattle,,-10,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1992,,balance_deer,,10,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1994,,balance_deer,,5,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1995,,balance_deer,,-5,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1997,,balance_deer,,-5,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1999,,balance_deer,,-5,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2001,,balance_deer,,5,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2002,,balance_deer,,-15,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2003,,balance_deer,,5,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2004,,balance_deer,,-55,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2005,,balance_deer,,360,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2006,,balance_deer,,100,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2007,,balance_deer,,300,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2008,,balance_deer,,380,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2009,,balance_deer,,750,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2010,,balance_deer,,400,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2011,,balance_deer,,600,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2012,,balance_deer,,850,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2013,,balance_deer,,850,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2014,,balance_deer,,100,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1985,,balance_horses,,-5,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1986,,balance_horses,,5,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1989,,balance_horses,,-5,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1990,,balance_horses,,-5,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1992,,balance_horses,,10,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1994,,balance_horses,,-5,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1996,,balance_horses,,-5,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1997,,balance_horses,,-20,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1998,,balance_horses,,-15,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,1999,,balance_horses,,-30,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2000,,balance_horses,,-30,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2001,,balance_horses,,-30,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2002,,balance_horses,,-25,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2003,,balance_horses,,-20,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2004,,balance_horses,,-40,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2005,,balance_horses,,-40,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2006,,balance_horses,,110,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2007,,balance_horses,,284,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2008,,balance_horses,,15,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2009,,balance_horses,,170,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2010,,balance_horses,,260,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2011,,balance_horses,,45,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2012,,balance_horses,,340,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2013,,balance_horses,,120,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,2014,,balance_horses,,-15,flagged,count(y+1) - count(y) - births(y) + deaths(y) is not zero
+herbivores,all,,total columns,=SUM(...),,dropped,Excel formulas; totals are recomputed in herbivores_counts.csv
+grass,all,,"sheets Blad2, Blad3",,,dropped,empty sheets
+grass,all,,grass_height_cm,,,note,"one measurement per year (1 August); height, not biomass; no data after 2014"
+wolves,2012,North,pups_born,Err,,set empty,text 'Err' instead of a number
+wolves,2017,South,pups_born,Err,,set empty,text 'Err' instead of a number
+wolves,2023,South,pups_born,Err,,set empty,text 'Err' instead of a number
+wolves,2013,South,mortality,,,kept empty,missing in source
+wolves,2021,South,mortality,,,kept empty,missing in source
+wolves,all,,unexplained_change,,,note,total grows by less than pups - mortality in most years (dispersal or uncounted deaths?)
+wolves,all,,dataset,,,note,"reference area with North/South regions, not the Oostvaardersplassen (which has no wolves)"
+wolf_area_prey,all,,Fiscal_Year,,year,renamed,same column as 'Year' in Predator_Data; assumed calendar year
+wolf_area_prey,2012,North,grass_biomass_kg_ha,,,kept empty,missing in source
+wolf_area_prey,2021,South,grass_biomass_kg_ha,,,kept empty,missing in source
+wolf_area_prey,2012,North,avg_deer_weight_kg,500.0,,set empty,impossible value; all other years lie between 104.3 and 106.3 kg
