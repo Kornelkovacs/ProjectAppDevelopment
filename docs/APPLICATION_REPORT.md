@@ -70,7 +70,10 @@ convenience methods (`finalState()`, `maxValue(seriesIndex)`, `toCsv()`).
 `CsvDataLoader` reads `data/clean/herbivores_counts.csv` and
 `data/clean/grass_height.csv` by column name (so the extra `total`/`reliable`/
 `note` columns in the herbivore file are ignored) into `HerbivoreCount` and
-`GrassHeightObservation` records with nullable fields. It never reads the raw
+`GrassHeightObservation` records with nullable fields. It also reads
+`data/clean/climate_monthly.csv` (KNMI monthly temperature, rain and reference
+evaporation, 1983–2025, made by `scripts/clean_climate.py`) into
+`ClimateObservation` records. It never reads the raw
 `.xlsx` files — those are converted once, offline, by `scripts/clean_data.py`
 (pandas + openpyxl), which also writes `data/clean/corrections.csv`, a full log
 of every value it changed or flagged, summarised in `data/README.md`. That
@@ -98,7 +101,7 @@ simulation's time axis via the start-year spinner.
 ### `nl.ovp.app` — entry point
 
 `Main` launches the GUI by default, or runs headless with
-`--cli [--model N] [--wolves N] [--dt X] [--years N]`, printing
+`--cli [--model N] [--wolves N] [--dt X] [--years N] [--replay YEAR]`, printing
 `SimulationResult.toCsv()` to stdout. Both paths have been smoke-tested: the
 CLI produces correct CSV output, and the GUI starts and stays alive without
 exceptions (tested at the terminal; an EDT interaction click-through hasn't
@@ -126,21 +129,31 @@ wiring — but see open tasks below).
 
 Roughly in the order it blocks the research questions:
 
-1. **Calibrate the placeholder parameters.** Every growth rate, carrying
-   capacity, competition coefficient, climate sensitivity and wolf parameter
-   in `ModelParameters` is currently a guess marked `// TODO: fit/look up`.
+1. **Calibrate the remaining placeholder parameters.** Growth rates, carrying
+   capacities and competition coefficients are now fitted (1983–2015 reliable
+   counts, `scripts/fit_parameters.py`, see `docs/CALIBRATION.md`; K for cattle
+   and deer and the two fitted α are weakly determined). Still guesses marked
+   `// TODO: fit/look up`: climate sensitivity, `grassVar` and the wolf
+   predation parameters. Original plan, for reference:
    Fit `growthRate`/`carryingCapacity` against `data/clean/herbivores_counts.csv`
    restricted to 1983–2017 (per the corrections log), fit `GrassModel`'s `var`
-   and `meanAnnualTemperature`/`seasonalAmplitude` against
-   `data/clean/grass_height.csv`, and decide a reasoned starting point for
-   wolf attack rate/handling time/conversion efficiency/mortality since there
-   is no direct Oostvaardersplassen wolf data (`data/clean/wolves.csv` and
+   against `data/clean/grass_height.csv` (the temperature profile,
+   `meanAnnualTemperature` = 10.0 °C and `seasonalAmplitude` = 7.4 °C, is already
+   fitted to the KNMI data by `scripts/fit_temperature_profile.py`), and decide a reasoned starting point for
+   wolf attack rate/handling time/conversion efficiency since there
+   is no direct Oostvaardersplassen wolf data (wolf mortality is set: 0.23/yr
+   from `data/clean/wolf_rates.csv`) (`data/clean/wolves.csv` and
    `wolf_area_prey.csv` are a different reference area — use them for
    order-of-magnitude estimates only, as noted in `data/README.md`).
 2. **Validate against `herbivores_counts.csv`/`herbivores_dynamics.csv`** once
    fitted — does `CompetitionModel` starting from the 1983 initial conditions
    roughly track the observed curve through 2017? This is the main evidence
-   for the report's methodology section.
+   for the report's methodology section. `--replay 2017` then tests the
+   managed period 2018–2025 out of sample, with the culls and relocations from
+   `data/clean/herbivore_events.csv` as input (`ManagementEvent`, the `M_i(t)`
+   term of `CompetitionModel`). With today's placeholders the replay collapses
+   horses and deer by 2020: the placeholder K values are far below the observed
+   2017 herds.
 3. **Answer the three research questions with the calibrated model** and write
    up the findings (stability of 1,100 animals; wolf release scenarios across
    a range of wolf counts; temperature-rise sweep to find the threshold that

@@ -23,11 +23,18 @@ src/test/java/nl/ovp/   JUnit 5 tests, mirroring the main package layout
 
 data/
   raw/     original course spreadsheets (.xlsx), unmodified
-  clean/   CSVs produced by scripts/clean_data.py; the only thing Java reads
+  raw/knmi/  KNMI monthly + daily climate files (Lelystad, De Bilt)
+  clean/   CSVs produced by scripts/clean_*.py; the only thing Java reads
   README.md   full log of every correction made to the raw data
 
 scripts/
   clean_data.py   one-off pandas script: data/raw/*.xlsx -> data/clean/*.csv
+                  (also herbivore_events.csv, winter_mortality_nos.csv, wolf_rates.csv)
+  clean_climate.py   data/raw/knmi -> data/clean/climate_monthly.csv (checked against daily KNMI data)
+  fit_temperature_profile.py   fits meanAnnualTemperature / seasonalAmplitude to the climate data
+  fit_parameters.py   fits growthRate / carryingCapacity / competitionAlpha to the counts (docs/CALIBRATION.md)
+  plot_validation.py   docs/figures/validation.png, model (via the jar) vs observed counts
+  build_model_equations_pdf.py   rebuilds docs/MODEL_EQUATIONS.pdf from the current code (needs reportlab)
 ```
 
 ### Model layer
@@ -66,7 +73,9 @@ scripts/
 `CsvDataLoader` reads `data/clean/herbivores_counts.csv` and
 `data/clean/grass_height.csv` by column name (so extra columns like `reliable`
 or `note` are ignored) into `HerbivoreCount` / `GrassHeightObservation` records
-with nullable fields. Java never touches the raw `.xlsx` files — only
+with nullable fields, and `data/clean/climate_monthly.csv` (monthly KNMI
+temperature, rain and reference evaporation) into `ClimateObservation` records.
+Java never touches the raw `.xlsx` files — only
 `scripts/clean_data.py` does, and every correction it makes is logged in
 `data/clean/corrections.csv` and summarised in `data/README.md`.
 
@@ -94,13 +103,16 @@ java -jar target/app.jar --cli --years 20 --wolves 10      # headless, prints CS
 
 CLI flags: `--model N` (index into `ModelRegistry.all()`, defaults to the most
 general model so `--wolves` always takes effect), `--wolves N`, `--dt X`
-(years), `--years N`.
+(years), `--years N`, `--replay YEAR` (start from the counts observed on 1 January
+of YEAR and apply the known culls, relocations and die-off from
+`data/clean/herbivore_events.csv`; `t = 0` is that date).
 
 To regenerate the cleaned CSVs from the raw spreadsheets:
 
 ```
 pip install pandas openpyxl
 python scripts/clean_data.py data/raw data/clean
+python scripts/clean_climate.py data/raw/knmi data/clean
 ```
 
 ## Adding a new model

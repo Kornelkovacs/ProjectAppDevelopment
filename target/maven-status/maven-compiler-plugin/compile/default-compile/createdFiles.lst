@@ -14,13 +14,16 @@ nl/ovp/ui/MainWindow.class
 nl/ovp/solver/Simulator.class
 nl/ovp/solver/OdeSolver.class
 nl/ovp/app/Main.class
+nl/ovp/model/ManagementEvent.class
 nl/ovp/model/PopulationModel.class
 nl/ovp/model/ModelParameters.class
 nl/ovp/solver/EulerSolver.class
 nl/ovp/ui/ChartPanel.class
 nl/ovp/model/LogisticModel.class
+nl/ovp/data/WolfRates.class
 nl/ovp/ui/ValueSlider.class
 nl/ovp/data/HerbivoreCount.class
 nl/ovp/ui/ParameterPanel.class
+nl/ovp/data/ClimateObservation.class
 nl/ovp/model/PredatorPreyModel.class
 nl/ovp/data/GrassHeightObservation.class

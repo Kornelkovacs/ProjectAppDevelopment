@@ -16,6 +16,8 @@ package nl.ovp.model;
  * dN_i/dt = competitionGrowth_i - kills_i
  * dW/dt   = sum_i(e_i * kills_i) - m * W
  * </pre>
+ * {@code competitionGrowth_i} includes the management-event flow {@code M_i(t)}
+ * of {@link CompetitionModel} (culls, relocations), zero when there are no events.
  * See Gotelli, "A Primer of Ecology", ch. 6 ("Predator-prey systems") for the
  * single-prey Lotka-Volterra and Holling type II foundations that this
  * multi-prey functional response extends.

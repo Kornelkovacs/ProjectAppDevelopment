@@ -1,0 +1,7 @@
+event,species,start,end,change,source
+introduction,horses,1983-12,1983-12,20,first count with horses is 1984 (20); release month assumed: just before that count
+introduction,deer,1991-12,1991-12,45,first count with deer is 1992 (45); release month assumed: just before that count
+die-off,all,2017-12,2018-03,-3226,footnote 1) winter 2017-2018; number from NOS (https://nos.nl/artikel/2230763-ruim-3200-grote-grazers-oostvaardersplassen-dood-afgelopen-winter); 89% shot as reactive culling; months assumed = winter
+cull,deer,2018-12,2019-10,-1785,footnote 2) 1785 deer shot Dec 2018 - Oct 2019
+relocation,horses,2018-01,2021-12,-560,footnote 3) 560 horses moved 2018-2021; spread evenly over the four years (assumption)
+cull,deer,2022-07,2023-05,-1800,footnote 4) 1800 deer shot Jul 2022 - May 2023

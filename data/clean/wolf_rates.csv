@@ -1,0 +1,4 @@
+region,pups_per_wolf_mean,pups_per_wolf_sd,pups_per_wolf_n,deaths_per_wolf_mean,deaths_per_wolf_sd,deaths_per_wolf_n,lost_per_wolf_mean,lost_per_wolf_sd,lost_per_wolf_n,growth_rate_mean,growth_rate_sd,growth_rate_n,growth_rate_endpoints
+North,0.3243,0.049,15,0.1477,0.055,16,0.106,0.0418,14,0.0714,0.0337,15,0.0714
+South,0.3075,0.0602,14,0.1339,0.0606,14,0.0686,0.0813,11,0.0924,0.0497,15,0.0924
+All,0.3162,0.0543,29,0.1413,0.0571,30,0.0896,0.0637,25,0.0819,0.043,30,0.0806

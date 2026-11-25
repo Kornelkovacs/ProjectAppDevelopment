@@ -122,3 +122,5 @@ wolf_area_prey,all,,Fiscal_Year,,year,renamed,same column as 'Year' in Predator_
 wolf_area_prey,2012,North,grass_biomass_kg_ha,,,kept empty,missing in source
 wolf_area_prey,2021,South,grass_biomass_kg_ha,,,kept empty,missing in source
 wolf_area_prey,2012,North,avg_deer_weight_kg,500.0,,set empty,impossible value; all other years lie between 104.3 and 106.3 kg
+winter_mortality,2010-2014,,deaths,,,note,"Moodle deaths up to 2x the NOS winter deaths; the excess follows the balance gap, so the Moodle deaths (not the counts) are probably too high"
+wolf_rates,all,,rates,,,note,"computed from measured values only; reference area, not the Oostvaardersplassen"

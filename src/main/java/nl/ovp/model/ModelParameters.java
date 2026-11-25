@@ -1,6 +1,7 @@
 package nl.ovp.model;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Single holder for every numeric parameter used by every {@link PopulationModel}
@@ -13,12 +14,12 @@ import java.util.Arrays;
  * directly; use {@link #copy()} to obtain an independent snapshot before handing
  * parameters to a simulation run.
  * <p>
- * Defaults for growth rates, carrying capacities, competition coefficients,
- * climate sensitivities and predation parameters are placeholders that must be
- * fitted against the historical data in {@code data/herbivores.csv} and
- * {@code data/grass_height.csv} (see Gotelli, "A Primer of Ecology", ch. 2 for
- * logistic growth and ch. 5 for competition). Each placeholder is marked with
- * {@code // TODO: fit/look up}.
+ * Growth rates, carrying capacities and competition coefficients are fitted to
+ * {@code data/clean/herbivores_counts.csv} by {@code scripts/fit_parameters.py}; wolf
+ * mortality comes from {@code data/clean/wolf_rates.csv}; the temperature profile from KNMI
+ * data (see Gotelli, "A Primer of Ecology", ch. 2 for logistic growth and ch. 5 for
+ * competition). Values still unvalidated (climate sensitivities, grass width, wolf
+ * predation) are marked with {@code // TODO: fit/look up}.
  */
 public final class ModelParameters {
 
@@ -40,18 +41,30 @@ public final class ModelParameters {
 
     // --- Logistic / competition growth parameters, per species. ---
 
+    /*
+     * growthRate, carryingCapacity and competitionAlpha are fitted jointly: least squares on log
+     * counts of the competition ODE (deltaT = 0), 1983-2017 counts with reliable = True
+     * (i.e. 1983-2015), scripts/fit_parameters.py, "constrained, chosen" model; results and
+     * standard errors in docs/calibration_fit.csv and docs/CALIBRATION.md. R² on the counts:
+     * cattle 0.95, horses 0.98, deer 0.97. Values rounded.
+     */
+
     /** Intrinsic growth rate r_i (per year), indexed by {@link Species#ordinal()}. */
     public double[] growthRate = {
-        0.25, // CATTLE  // TODO: fit/look up
-        0.25, // HORSES  // TODO: fit/look up
-        0.30  // DEER    // TODO: fit/look up
+        0.21, // CATTLE  // fitted 0.213 ± 0.008, scripts/fit_parameters.py
+        0.21, // HORSES  // fitted 0.211 ± 0.009, scripts/fit_parameters.py
+        0.34  // DEER    // fitted 0.344 ± 0.037, scripts/fit_parameters.py
     };
 
-    /** Carrying capacity K_i (head count), indexed by {@link Species#ordinal()}. */
+    /**
+     * Carrying capacity K_i (head count) of each species <em>alone</em>, indexed by
+     * {@link Species#ordinal()}. With the other species present the reachable numbers are lower
+     * (competition). K for cattle and deer are weakly determined by the data (see SE).
+     */
     public double[] carryingCapacity = {
-        600.0,  // CATTLE // TODO: fit/look up
-        600.0,  // HORSES // TODO: fit/look up
-        2500.0  // DEER   // TODO: fit/look up
+        1070.0, // CATTLE // fitted 1068 ± 410 (weakly determined), scripts/fit_parameters.py
+        2500.0, // HORSES // fitted 2495 ± 401, scripts/fit_parameters.py
+        5100.0  // DEER   // fitted 5093 ± 2570 (weakly determined), scripts/fit_parameters.py
     };
 
     /**
@@ -59,14 +72,17 @@ public final class ModelParameters {
      * on species i's carrying capacity, indexed by {@link Species#ordinal()}.
      * Diagonal entries are 1.0 by convention (a species' own density counts at
      * full weight against its own carrying capacity). The brief fixes the
-     * effect of deer on cattle and horses at 30%; all other off-diagonal
-     * entries are placeholders.
+     * effect of deer on cattle and horses at 30%. The other four entries are
+     * fitted with two shared values (four free values are not identifiable from
+     * the counts): a = cattle&lt;-&gt;horses (same grazing guild, symmetric),
+     * fitted 0.24 ± 0.55; b = effect of cattle or horses on deer, fitted 0.80 ± 1.28.
+     * Both are weakly determined; treat them as scenario values for sensitivity runs.
      */
     public double[][] competitionAlpha = {
-        // CATTLE           HORSES            DEER
-        {  1.0,             0.2 /* TODO: fit/look up */, 0.3 },
-        {  0.2 /* TODO: fit/look up */, 1.0,              0.3 },
-        {  0.1 /* TODO: fit/look up */, 0.1 /* TODO: fit/look up */, 1.0 }
+        // CATTLE  HORSES  DEER
+        {  1.0,    0.24,   0.3 },  // a fitted; 0.3 from the brief
+        {  0.24,   1.0,    0.3 },  // a fitted; 0.3 from the brief
+        {  0.80,   0.80,   1.0 }   // b fitted
     };
 
     /**
@@ -92,11 +108,21 @@ public final class ModelParameters {
     /** Width (variance-like spread) of the growth-potential Gaussian. */
     public double grassVar = 8.0; // TODO: fit/look up
 
-    /** Mean annual temperature today, in degrees Celsius, used to build the monthly cosine profile. */
-    public double meanAnnualTemperature = 10.0; // TODO: fit/look up
+    /**
+     * Mean annual temperature today, in degrees Celsius, used to build the monthly cosine profile.
+     * Fitted: 9.96 °C, least squares on KNMI monthly means 1983–2017
+     * ({@code data/clean/climate_monthly.csv}, Lelystad; De Bilt adjusted before 1990),
+     * {@code scripts/fit_temperature_profile.py}. Same window as the herbivore fit, so
+     * {@code deltaT = 0} is the climate in which the herds were observed.
+     */
+    public double meanAnnualTemperature = 10.0;
 
-    /** Seasonal temperature amplitude (half the peak-to-trough swing), in degrees Celsius; summer peaks mid-July. */
-    public double seasonalAmplitude = 8.0; // TODO: fit/look up
+    /**
+     * Seasonal temperature amplitude (half the peak-to-trough swing), in degrees Celsius; summer peaks mid-July.
+     * Fitted: 7.39 °C, same fit as {@link #meanAnnualTemperature} (R² = 0.89; a free-phase
+     * fit puts the peak at ~22 July, so the fixed mid-July peak is justified).
+     */
+    public double seasonalAmplitude = 7.4;
 
     /** Peak grass growth rate at optimum temperature, in kg/ha/month. Fixed by the brief. */
     public double grassMaxGrowthKgPerHaPerMonth = 60.0;
@@ -133,8 +159,31 @@ public final class ModelParameters {
         0.01  // DEER   // TODO: fit/look up
     };
 
-    /** Wolf mortality rate m (per year), in the absence of sufficient prey. */
-    public double wolfMortality = 0.2; // TODO: fit/look up
+    /**
+     * Wolf mortality rate m (per year), in the absence of sufficient prey.
+     * From data: 0.23 = recorded deaths 0.141 + wolves lost without a recorded death
+     * (dispersal or unrecorded deaths) 0.090 per wolf per year, means over both regions
+     * 2010-2025 in {@code data/clean/wolf_rates.csv} ({@code scripts/clean_data.py}, measured
+     * values only). Dispersal counts as a loss because the Oostvaardersplassen is far smaller
+     * than a wolf pack's range. Reference area, not the Oostvaardersplassen: an indication only.
+     * Ranges for sweeps: SD 0.057 (deaths) and 0.064 (lost).
+     */
+    public double wolfMortality = 0.23;
+
+    // --- Management events (culls, relocations, introductions, die-off). ---
+
+    /**
+     * Calendar year at simulation time t = 0, used to place {@link #events} in time.
+     * Default 2026 (a run "from now"); a replay of history sets it to the first year.
+     */
+    public double startYear = 2026.0;
+
+    /**
+     * Known events that add or remove animals, from {@code data/clean/herbivore_events.csv}.
+     * Default empty: policy scenarios start from the target numbers without past events.
+     * Events are immutable records, so a copied list is an independent copy.
+     */
+    public List<ManagementEvent> events = List.of();
 
     // --- Simulation horizon/step defaults. ---
 
@@ -171,6 +220,9 @@ public final class ModelParameters {
         this.handlingTime = src.handlingTime;
         this.conversionEfficiency = Arrays.copyOf(src.conversionEfficiency, N);
         this.wolfMortality = src.wolfMortality;
+
+        this.startYear = src.startYear;
+        this.events = List.copyOf(src.events);
 
         this.horizonYears = src.horizonYears;
         this.dtYears = src.dtYears;

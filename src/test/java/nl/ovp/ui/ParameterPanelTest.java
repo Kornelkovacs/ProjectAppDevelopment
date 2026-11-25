@@ -49,7 +49,7 @@ class ParameterPanelTest {
         panel.resetCompetitionToDefaults();
 
         ModelParameters p = panel.buildParameters();
-        assertEquals(2500, p.carryingCapacity[D], 1e-9);
-        assertEquals(0.2, p.competitionAlpha[H][C], 1e-9);
+        assertEquals(new ModelParameters().carryingCapacity[D], p.carryingCapacity[D], 1e-9);
+        assertEquals(new ModelParameters().competitionAlpha[H][C], p.competitionAlpha[H][C], 1e-9);
     }
 }

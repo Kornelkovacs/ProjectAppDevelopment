@@ -9,12 +9,20 @@ prefix; they are matched on their distinctive part). Every correction is written
 data/clean/corrections.csv, one row per changed or flagged cell, so the cleaning is
 fully traceable. Nothing is imputed: missing or wrong values become empty cells.
 
+Besides the cleaned tables it derives three small files used by the models:
+    herbivore_events.csv      introductions, die-off, culls and relocations (dated windows)
+    winter_mortality_nos.csv  independent winter death totals (NOS) vs the Moodle deaths
+    wolf_rates.csv            per-wolf birth, death and loss rates (measured values only)
+The event, NOS and wolf-rate logic was merged in from the group's herbivore_clean.py and
+predator_prey_clean.py, without their zero-filling and interpolation steps.
+
 Requires: pandas, openpyxl
 """
 import glob
 import os
 import sys
 
+import numpy as np
 import openpyxl
 import pandas as pd
 
@@ -31,6 +39,31 @@ FOOTNOTES = {
     "3)": "560 horses moved to other reserves between 2018 and 2021",
     "4)": "1800 deer shot between July 2022 and May 2023",
 }
+
+# Natural dynamics / mass die-off / culling and relocation (see data/README.md).
+PERIODS = [(1983, 2017, "natural"), (2018, 2018, "crash"), (2019, 2025, "managed")]
+
+# Events outside natural births and deaths. `start`/`end` are inclusive calendar months.
+# `change` is signed: + animals added, - animals removed. Species "all" = shared by the
+# three species in proportion to their numbers (a modelling assumption; no split is given).
+NOS_URL = "https://nos.nl/artikel/2230763-ruim-3200-grote-grazers-oostvaardersplassen-dood-afgelopen-winter"
+EVENTS = [
+    ("introduction", "horses", "1983-12", "1983-12", +20,
+     "first count with horses is 1984 (20); release month assumed: just before that count"),
+    ("introduction", "deer", "1991-12", "1991-12", +45,
+     "first count with deer is 1992 (45); release month assumed: just before that count"),
+    ("die-off", "all", "2017-12", "2018-03", -3226,
+     f"footnote 1) winter 2017-2018; number from NOS ({NOS_URL}); 89% shot as reactive culling;"
+     " months assumed = winter"),
+    ("cull", "deer", "2018-12", "2019-10", -1785, "footnote 2) 1785 deer shot Dec 2018 - Oct 2019"),
+    ("relocation", "horses", "2018-01", "2021-12", -560,
+     "footnote 3) 560 horses moved 2018-2021; spread evenly over the four years (assumption)"),
+    ("cull", "deer", "2022-07", "2023-05", -1800, "footnote 4) 1800 deer shot Jul 2022 - May 2023"),
+]
+
+# Total winter deaths of all three species reported by NOS (winter starting in this year).
+NOS_WINTERS = [(2010, 761), (2011, 1381), (2012, 1728), (2013, 204),
+               (2014, 1374), (2015, 1613), (2016, 813), (2017, 3226)]
 
 corrections = []
 
@@ -120,6 +153,9 @@ def clean_herbivores(path):
     reliable = long.groupby("year")["reliable"].all().reset_index(drop=True)
     wide["reliable"] = reliable.values
     wide["note"] = long.groupby("year")["note"].first().values
+    wide["period"] = ""
+    for first, last, name in PERIODS:
+        wide.loc[wide["year"].between(first, last), "period"] = name
     wide.columns.name = None
     return wide, long
 
@@ -184,6 +220,65 @@ def clean_prey(path):
     return df
 
 
+# --------------------------------------------------------------------------- derived files
+def herbivore_events():
+    rows = [{"event": e, "species": sp, "start": a, "end": b, "change": n, "source": src}
+            for e, sp, a, b, n, src in EVENTS]
+    for r in rows:
+        assert "," not in r["source"], "the Java CSV reader does not support commas inside fields"
+    return pd.DataFrame(rows)
+
+
+def winter_mortality(long):
+    """NOS winter deaths next to the Moodle deaths of the following year and the balance gap."""
+    deaths = long.groupby("year")["deaths"].sum(min_count=1)
+    gap = long.groupby("year")["unexplained_change"].sum(min_count=3)
+    rows = []
+    for start, nos in NOS_WINTERS:
+        moodle = deaths.get(start + 1, pd.NA)
+        rows.append({
+            "winter": f"{start}-{start + 1}",
+            "deaths_nos": nos,
+            "deaths_moodle_next_year": moodle,
+            "ratio_moodle_nos": round(moodle / nos, 2) if pd.notna(moodle) else pd.NA,
+            "excess_moodle_minus_nos": moodle - nos if pd.notna(moodle) else pd.NA,
+            "balance_gap_all_species": gap.get(start + 1, pd.NA),
+            "note": "89% of these animals were shot (reactive culling)" if start == 2017 else "",
+            "source": NOS_URL,
+        })
+    out = pd.DataFrame(rows)
+    for c in ["deaths_moodle_next_year", "excess_moodle_minus_nos", "balance_gap_all_species"]:
+        out[c] = out[c].astype("Int64")
+    log("winter_mortality", "2010-2014", "", "deaths", "", "", "note",
+        "Moodle deaths up to 2x the NOS winter deaths; the excess follows the balance gap,"
+        " so the Moodle deaths (not the counts) are probably too high")
+    return out
+
+
+def wolf_rates(wolves):
+    """Per-wolf rates from measured values only (empty cells stay out of the means)."""
+    d = wolves.sort_values(["region", "year"]).copy()
+    w = d["total_wolves"].astype(float)
+    nxt = d.groupby("region")["total_wolves"].shift(-1).astype(float)
+    d["pups_per_wolf"] = d["pups_born"].astype(float) / w
+    d["deaths_per_wolf"] = d["mortality"].astype(float) / w
+    d["lost_per_wolf"] = -d["unexplained_change"].astype(float) / w   # dispersal or unrecorded deaths
+    d["growth_rate"] = np.log(nxt / w)                               # r = ln(W(t+1)/W(t))
+    rows = []
+    for region, g in list(d.groupby("region")) + [("All", d)]:
+        row = {"region": region}
+        for c in ["pups_per_wolf", "deaths_per_wolf", "lost_per_wolf", "growth_rate"]:
+            s = g[c].dropna()
+            row[f"{c}_mean"], row[f"{c}_sd"], row[f"{c}_n"] = round(s.mean(), 4), round(s.std(), 4), len(s)
+        totals = g.groupby("year")["total_wolves"].sum()
+        row["growth_rate_endpoints"] = round(
+            np.log(totals.iloc[-1] / totals.iloc[0]) / (totals.index[-1] - totals.index[0]), 4)
+        rows.append(row)
+    log("wolf_rates", "all", "", "rates", "", "", "note",
+        "computed from measured values only; reference area, not the Oostvaardersplassen")
+    return pd.DataFrame(rows)
+
+
 # --------------------------------------------------------------------------- main
 def main(raw_dir, out_dir):
     os.makedirs(out_dir, exist_ok=True)
@@ -197,8 +292,11 @@ def main(raw_dir, out_dir):
     grass.to_csv(os.path.join(out_dir, "grass_height.csv"), index=False)
     wolves.to_csv(os.path.join(out_dir, "wolves.csv"), index=False)
     prey.to_csv(os.path.join(out_dir, "wolf_area_prey.csv"), index=False)
+    herbivore_events().to_csv(os.path.join(out_dir, "herbivore_events.csv"), index=False)
+    winter_mortality(long).to_csv(os.path.join(out_dir, "winter_mortality_nos.csv"), index=False)
+    wolf_rates(wolves).to_csv(os.path.join(out_dir, "wolf_rates.csv"), index=False)
     pd.DataFrame(corrections).to_csv(os.path.join(out_dir, "corrections.csv"), index=False)
-    print(f"Wrote 5 data files and {len(corrections)} correction rows to {out_dir}")
+    print(f"Wrote 8 data files and {len(corrections)} correction rows to {out_dir}")
 
 
 if __name__ == "__main__":

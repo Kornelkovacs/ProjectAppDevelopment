@@ -3,6 +3,9 @@ package nl.ovp.model;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 class ModelParametersTest {
@@ -19,8 +22,28 @@ class ModelParametersTest {
         assertNotSame(original.growthRate, copy.growthRate);
         assertNotSame(original.competitionAlpha, copy.competitionAlpha);
 
-        assertEquals(0.25, original.growthRate[Species.CATTLE.ordinal()]);
+        assertEquals(new ModelParameters().growthRate[Species.CATTLE.ordinal()], original.growthRate[Species.CATTLE.ordinal()]);
         assertEquals(500.0, original.initialDeer);
+    }
+
+    @Test
+    void copiedEventListIsIndependentOfOriginal() {
+        ModelParameters original = new ModelParameters();
+        List<ManagementEvent> mutable = new ArrayList<>();
+        mutable.add(new ManagementEvent(Species.DEER, 2018.0, 2019.0, -100.0));
+        original.events = mutable;
+
+        ModelParameters copy = original.copy();
+        mutable.add(new ManagementEvent(Species.HORSES, 2018.0, 2019.0, -50.0));
+        original.startYear = 1990.0;
+
+        assertEquals(1, copy.events.size());
+        assertEquals(2026.0, copy.startYear);
+    }
+
+    @Test
+    void defaultsHaveNoEvents() {
+        assertEquals(List.of(), new ModelParameters().events);
     }
 
     @Test

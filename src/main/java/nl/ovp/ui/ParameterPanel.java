@@ -68,8 +68,8 @@ final class ParameterPanel extends JPanel {
     final JButton resetCompetitionButton;
 
     private static final double K_MIN = 0.0;
-    private static final double K_MAX = 5000.0;
-    private static final double K_STEP = 50.0;
+    private static final double K_MAX = 10000.0;
+    private static final double K_STEP = 10.0;
     private static final double ALPHA_MIN = 0.0;
     private static final double ALPHA_MAX = 2.0;
     private static final double ALPHA_STEP = 0.01;

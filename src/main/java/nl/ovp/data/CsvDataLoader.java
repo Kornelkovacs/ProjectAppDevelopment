@@ -10,9 +10,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import nl.ovp.model.ManagementEvent;
+import nl.ovp.model.Species;
+
 /**
  * Reads the cleaned CSV files produced by {@code scripts/clean_data.py} from
- * the raw Oostvaardersplassen Excel sheets in {@code data/raw/} (see
+ * the raw Oostvaardersplassen Excel sheets in {@code data/raw/}, and by
+ * {@code scripts/clean_climate.py} from the KNMI files in {@code data/raw/knmi/} (see
  * {@code data/README.md} for the exact corrections applied, e.g. dropping
  * "not always trustworthy" counts or an impossible 500 kg deer weight). Java
  * only ever reads these CSVs; it never touches the raw {@code .xlsx} files.
@@ -25,6 +29,9 @@ public final class CsvDataLoader {
 
     private static final Path DEFAULT_HERBIVORES_CSV = Path.of("data", "clean", "herbivores_counts.csv");
     private static final Path DEFAULT_GRASS_HEIGHT_CSV = Path.of("data", "clean", "grass_height.csv");
+    private static final Path DEFAULT_CLIMATE_CSV = Path.of("data", "clean", "climate_monthly.csv");
+    private static final Path DEFAULT_EVENTS_CSV = Path.of("data", "clean", "herbivore_events.csv");
+    private static final Path DEFAULT_WOLF_RATES_CSV = Path.of("data", "clean", "wolf_rates.csv");
 
     /** Loads {@code data/clean/herbivores_counts.csv} relative to the working directory. */
     public List<HerbivoreCount> loadHerbivores() {
@@ -58,6 +65,80 @@ public final class CsvDataLoader {
             rows.add(new GrassHeightObservation(year, parseNullableDouble(table.require(row, "grass_height_cm"))));
         }
         return rows;
+    }
+
+    /** Loads {@code data/clean/climate_monthly.csv} relative to the working directory. */
+    public List<ClimateObservation> loadClimate() {
+        return loadClimate(DEFAULT_CLIMATE_CSV);
+    }
+
+    /**
+     * Reads monthly temperature, rain and evaporation. The cleaning script
+     * ({@code scripts/clean_climate.py}) guarantees the series is complete, so
+     * an empty cell here is an error rather than a gap.
+     */
+    public List<ClimateObservation> loadClimate(Path csvPath) {
+        List<ClimateObservation> rows = new ArrayList<>();
+        CsvTable table = readCsv(csvPath);
+        for (Map<String, String> row : table.rows()) {
+            rows.add(new ClimateObservation(
+                Integer.parseInt(table.require(row, "year").trim()),
+                Integer.parseInt(table.require(row, "month").trim()),
+                Double.parseDouble(table.require(row, "t_mean_c").trim()),
+                Double.parseDouble(table.require(row, "rain_mm").trim()),
+                Double.parseDouble(table.require(row, "evap_mm").trim())));
+        }
+        return rows;
+    }
+
+    /** Loads {@code data/clean/herbivore_events.csv} relative to the working directory. */
+    public List<ManagementEvent> loadEvents() {
+        return loadEvents(DEFAULT_EVENTS_CSV);
+    }
+
+    /**
+     * Reads introductions, culls, relocations and the die-off. {@code start} and
+     * {@code end} are inclusive months ({@code YYYY-MM}); the event window runs from
+     * the first day of {@code start} to the last day of {@code end}. Species
+     * {@code all} becomes {@code null} (shared by all species).
+     */
+    public List<ManagementEvent> loadEvents(Path csvPath) {
+        List<ManagementEvent> rows = new ArrayList<>();
+        CsvTable table = readCsv(csvPath);
+        for (Map<String, String> row : table.rows()) {
+            String species = table.require(row, "species").trim();
+            rows.add(new ManagementEvent(
+                species.equals("all") ? null : Species.valueOf(species.toUpperCase()),
+                monthStart(table.require(row, "start")),
+                monthStart(table.require(row, "end")) + 1.0 / 12.0,
+                Double.parseDouble(table.require(row, "change").trim())));
+        }
+        return rows;
+    }
+
+    /** Loads {@code data/clean/wolf_rates.csv} relative to the working directory. */
+    public List<WolfRates> loadWolfRates() {
+        return loadWolfRates(DEFAULT_WOLF_RATES_CSV);
+    }
+
+    public List<WolfRates> loadWolfRates(Path csvPath) {
+        List<WolfRates> rows = new ArrayList<>();
+        CsvTable table = readCsv(csvPath);
+        for (Map<String, String> row : table.rows()) {
+            rows.add(new WolfRates(
+                table.require(row, "region").trim(),
+                Double.parseDouble(table.require(row, "pups_per_wolf_mean").trim()),
+                Double.parseDouble(table.require(row, "deaths_per_wolf_mean").trim()),
+                Double.parseDouble(table.require(row, "lost_per_wolf_mean").trim()),
+                Double.parseDouble(table.require(row, "growth_rate_mean").trim())));
+        }
+        return rows;
+    }
+
+    /** {@code "2018-12"} -> 2018 + 11/12, the first instant of that month as a decimal year. */
+    private static double monthStart(String yyyyMm) {
+        String[] parts = yyyyMm.trim().split("-");
+        return Integer.parseInt(parts[0]) + (Integer.parseInt(parts[1]) - 1) / 12.0;
     }
 
     private static Double parseNullableDouble(String raw) {
