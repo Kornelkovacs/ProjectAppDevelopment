@@ -1,9 +1,11 @@
 nl/ovp/data/CsvDataLoaderTest.class
+nl/ovp/solver/SimulatorTest$2.class
 nl/ovp/solver/SimulatorTest.class
 nl/ovp/app/MainTest.class
 nl/ovp/ui/ParameterPanelTest.class
 nl/ovp/model/ModelParametersTest.class
 nl/ovp/solver/RungeKutta4SolverTest.class
+nl/ovp/model/SeasonalGrazingModelTest.class
 nl/ovp/model/GrassModelTest.class
 nl/ovp/model/PredatorPreyModelTest.class
 nl/ovp/solver/SimulatorTest$1.class

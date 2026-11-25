@@ -42,6 +42,15 @@ class ParameterPanelTest {
     }
 
     @Test
+    void grazingAreaStartsAtDefaultAndReachesModelParameters() {
+        ParameterPanel panel = new ParameterPanel();
+        assertEquals(new ModelParameters().grazingAreaHa, panel.buildParameters().grazingAreaHa, 1e-9);
+
+        panel.grazingAreaSpinner.setValue(1880.0);
+        assertEquals(1880.0, panel.buildParameters().grazingAreaHa, 1e-9);
+    }
+
+    @Test
     void resetRestoresDefaults() {
         ParameterPanel panel = new ParameterPanel();
         panel.carryingCapacitySliders[D].setValue(100);

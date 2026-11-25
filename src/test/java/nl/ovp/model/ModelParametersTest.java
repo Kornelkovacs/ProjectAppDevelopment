@@ -27,6 +27,43 @@ class ModelParametersTest {
     }
 
     @Test
+    void seasonalGrazingArraysAreCopiedIndependently() {
+        ModelParameters original = new ModelParameters();
+        ModelParameters copy = original.copy();
+        int d = Species.DEER.ordinal();
+
+        copy.intake[d] = 99.0;
+        copy.maxBirthRate[d] = 99.0;
+        copy.backgroundMortality[d] = 99.0;
+        copy.winterStarvationMortality[d] = 99.0;
+        copy.grazingAreaHa = 1.0;
+
+        ModelParameters defaults = new ModelParameters();
+        assertEquals(defaults.intake[d], original.intake[d]);
+        assertEquals(defaults.maxBirthRate[d], original.maxBirthRate[d]);
+        assertEquals(defaults.backgroundMortality[d], original.backgroundMortality[d]);
+        assertEquals(defaults.winterStarvationMortality[d], original.winterStarvationMortality[d]);
+        assertEquals(1080.0, original.grazingAreaHa);
+    }
+
+    @Test
+    void copyKeepsSeasonalGrazingScalars() {
+        ModelParameters original = new ModelParameters();
+        original.grassCapacityTPerHa = 5.0;
+        original.grassGrowthRate = 10.0;
+        original.grassHalfSaturationTPerHa = 0.7;
+        original.grassWinterDecay = 2.0;
+        original.initialGrassFraction = 0.5;
+
+        ModelParameters copy = original.copy();
+        assertEquals(5.0, copy.grassCapacityTPerHa);
+        assertEquals(10.0, copy.grassGrowthRate);
+        assertEquals(0.7, copy.grassHalfSaturationTPerHa);
+        assertEquals(2.0, copy.grassWinterDecay);
+        assertEquals(0.5, copy.initialGrassFraction);
+    }
+
+    @Test
     void copiedEventListIsIndependentOfOriginal() {
         ModelParameters original = new ModelParameters();
         List<ManagementEvent> mutable = new ArrayList<>();

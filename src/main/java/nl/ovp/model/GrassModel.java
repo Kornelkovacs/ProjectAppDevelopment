@@ -17,7 +17,9 @@ package nl.ovp.model;
  * {@link #grassFactor} expresses how a temperature rise {@code deltaT}
  * changes the total annual yield relative to today's climate; this factor is
  * used by {@link CompetitionModel} to scale carrying capacities with climate
- * change (research question C).
+ * change (research question C). {@link SeasonalGrazingModel} instead uses
+ * {@link #growthPotential} at {@link #temperatureAt} directly, as the seasonal
+ * driver of grass growth and die-back.
  */
 public final class GrassModel {
 

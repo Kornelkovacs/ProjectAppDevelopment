@@ -25,5 +25,6 @@ nl/ovp/ui/ValueSlider.class
 nl/ovp/data/HerbivoreCount.class
 nl/ovp/ui/ParameterPanel.class
 nl/ovp/data/ClimateObservation.class
+nl/ovp/model/SeasonalGrazingModel.class
 nl/ovp/model/PredatorPreyModel.class
 nl/ovp/data/GrassHeightObservation.class

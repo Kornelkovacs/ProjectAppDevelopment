@@ -13,7 +13,8 @@ public final class ModelRegistry {
     private static final List<PopulationModel> ALL = List.of(
         new LogisticModel(),
         new CompetitionModel(),
-        new PredatorPreyModel()
+        new SeasonalGrazingModel(),
+        new PredatorPreyModel() // most general model last: it is the GUI/CLI default
     );
 
     private ModelRegistry() {

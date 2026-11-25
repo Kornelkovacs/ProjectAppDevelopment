@@ -29,7 +29,7 @@ horses=1, deer=2); `ModelParameters.copy()` deep-copies everything, including
 the 2D competition matrix, so one base parameter set can be branched for
 several what-if runs without them interfering.
 
-Three models implement `PopulationModel` (`name()`, `stateNames()`,
+Four models implement `PopulationModel` (`name()`, `stateNames()`,
 `initialState(p)`, `derivatives(t, y, p)`):
 
 - **`LogisticModel`** — `dN_i/dt = r_i N_i (1 - N_i/K_i)` per species,
@@ -47,12 +47,27 @@ Three models implement `PopulationModel` (`name()`, `stateNames()`,
   subtracts predation losses and adds wolf growth/mortality. This is the model
   for research question B (releasing wolves); a JUnit test confirms it reduces
   exactly to `CompetitionModel` when wolves = 0.
+- **`SeasonalGrazingModel`** — iteration 4, adapted from the
+  AgriculturalRiskFactors `GrazerModel` (see `docs/ARF_MERGE_OVERVIEW.md`).
+  State `[cattle, horses, deer, grass]`; grass in tonnes dry matter on
+  `grazingAreaHa` (default 1,080 ha, Van Geel 2018):
+  `dG/dt = r GP(t) G (1 - G/K) - d (1 - GP(t)) G - f(G) Σ q_i N_i` and
+  `dN_i/dt = N_i [2 b_i c_i s(t) f(G) - m_i - w_i (1 - s(t)) (1 - f(G))] + M_i(t)`,
+  with `GP` the brief's temperature growth potential, `s(t)` a calendar season,
+  `f` a Holling type II feeding level and `c_i = max(0, 1 + s_i ΔT)`. Food supply
+  is explicit, so winter starvation (the 2017-18 die-off) comes out of the model:
+  starting from the October 2017 herd on 1,880 ha, it falls to about 3,500 by
+  October 2018 (observed: 3,130) with uncalibrated parameters. Its solver step is
+  about daily (`maxStepYears()`). Known limit: with one shared food, only one
+  species persists in the very long run (competitive exclusion, ~100 years with
+  the provisional parameters). All its parameters are provisional.
 - **`GrassModel`** — static helper implementing Appendix 3's growth-potential
   Gaussian, with monthly temperature approximated as a cosine around the
-  annual mean (peak mid-July). Used only by `CompetitionModel`; not a
-  `PopulationModel` itself.
-- **`ModelRegistry`** lists all three models; the GUI dropdown and the CLI's
-  `--model` index both read from it, so a fourth model only needs to be added
+  annual mean (peak mid-July). Used by `CompetitionModel` (as a ratio) and by
+  `SeasonalGrazingModel` (as the seasonal driver); not a `PopulationModel` itself.
+- **`ModelRegistry`** lists all four models (0 logistic, 1 competition,
+  2 seasonal grazing, 3 predator-prey, the default); the GUI dropdown and the CLI's
+  `--model` index both read from it, so a new model only needs to be added
   there (see the "Adding a new model" section of the top-level README).
 
 ### `nl.ovp.solver` — numerical integration
@@ -60,7 +75,8 @@ Three models implement `PopulationModel` (`name()`, `stateNames()`,
 `OdeSolver` is a one-method interface (`step`). `EulerSolver` and
 `RungeKutta4Solver` (the default) both implement it; `Simulator` drives either
 one over `ModelParameters.horizonYears` at `ModelParameters.dtYears` (default:
-20 years, monthly steps), clamping any negative or NaN population to zero after
+20 years, monthly steps; split into smaller internal steps when a model's
+`maxStepYears()` requires it), clamping any negative or NaN population to zero after
 every step so extinct species stay at zero instead of going negative or
 oscillating through zero. `SimulationResult` holds the full time series plus
 convenience methods (`finalState()`, `maxValue(seriesIndex)`, `toCsv()`).
@@ -118,6 +134,15 @@ Nine JUnit 5 tests exist today:
   time series has the expected length.
 - `PredatorPreyModelTest` — zero wolves reduces exactly to `CompetitionModel`;
   releasing wolves reduces total prey versus the no-wolf baseline.
+- `SeasonalGrazingModelTest` — grass without animals is seasonal and stays
+  between 0 and capacity; states stay non-negative for 50 years from the 2017
+  herd; absent species stay absent; every species declines without grass;
+  grass eaten = f(G)·Σ q_i N_i; the event flow equals `CompetitionModel`'s; a
+  winter die-off follows from food shortage; more grassland sustains more
+  animals; warming helps horses and harms cattle; the season follows the
+  calendar start date; the result does not depend on the output step.
+- `SimulatorTest` also checks that internal steps are taken but only output
+  steps are recorded.
 - `CsvDataLoaderTest` — parses synthetic CSVs correctly, and also loads the
   real `data/clean/herbivores_counts.csv` (43 rows) and `grass_height.csv`
   (25 rows) and checks a few known values.

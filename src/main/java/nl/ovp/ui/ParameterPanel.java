@@ -29,6 +29,7 @@ import nl.ovp.solver.RungeKutta4Solver;
 /**
  * Left-hand input panel: model/solver choice, horizon, initial populations,
  * wolves released, per-species wolf prey preference, temperature rise, the
+ * grazing area of the seasonal grazing model, the
  * carrying capacities and competition coefficients (sliders), the
  * observed-data overlay controls. The action buttons are created here but
  * laid out by {@link MainWindow}, below the scrollable area. Values are
@@ -51,6 +52,7 @@ final class ParameterPanel extends JPanel {
     final JSpinner preyPrefHorsesSpinner;
     final JSpinner preyPrefDeerSpinner;
     final JSpinner deltaTSpinner;
+    final JSpinner grazingAreaSpinner;
     final JCheckBox showObservedCheckBox;
     final JSpinner startYearSpinner;
     final JButton runButton;
@@ -94,6 +96,9 @@ final class ParameterPanel extends JPanel {
         preyPrefHorsesSpinner = new JSpinner(new SpinnerNumberModel(1.0, 0.0, 1.0, 0.05));
         preyPrefDeerSpinner = new JSpinner(new SpinnerNumberModel(1.0, 0.0, 1.0, 0.05));
         deltaTSpinner = new JSpinner(new SpinnerNumberModel(0.0, -2.0, 6.0, 0.5));
+        grazingAreaSpinner = new JSpinner(new SpinnerNumberModel(new ModelParameters().grazingAreaHa, 10.0, 10_000.0, 10.0));
+        grazingAreaSpinner.setToolTipText("<html>Grassland the animals graze on (seasonal grazing model only).<br>"
+            + "1,080 ha today; 1,880 ha up to 2018 (Van Geel Committee, 2018)</html>");
         showObservedCheckBox = new JCheckBox("Show observed counts");
         startYearSpinner = new JSpinner(new SpinnerNumberModel(1983, 1900, 2100, 1));
         startYearSpinner.setEditor(new JSpinner.NumberEditor(startYearSpinner, "#")); // show 1983, not 1,983
@@ -139,6 +144,7 @@ final class ParameterPanel extends JPanel {
         row = addRow(row, "Prey preference – horses", preyPrefHorsesSpinner);
         row = addRow(row, "Prey preference – deer", preyPrefDeerSpinner);
         row = addRow(row, "Temperature rise (°C)", deltaTSpinner);
+        row = addRow(row, "Grazing area (ha)", grazingAreaSpinner);
 
         row = addSection(row, "Carrying capacity K (animals)");
         for (Species s : Species.values()) {
@@ -281,6 +287,7 @@ final class ParameterPanel extends JPanel {
         p.preyPreference[Species.HORSES.ordinal()] = asDouble(preyPrefHorsesSpinner);
         p.preyPreference[Species.DEER.ordinal()] = asDouble(preyPrefDeerSpinner);
         p.deltaT = asDouble(deltaTSpinner);
+        p.grazingAreaHa = asDouble(grazingAreaSpinner);
         for (int i = 0; i < carryingCapacitySliders.length; i++) {
             p.carryingCapacity[i] = carryingCapacitySliders[i].getValue();
             for (int j = 0; j < carryingCapacitySliders.length; j++) {

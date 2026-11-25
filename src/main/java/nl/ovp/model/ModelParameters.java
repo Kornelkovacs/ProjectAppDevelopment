@@ -19,7 +19,8 @@ import java.util.List;
  * mortality comes from {@code data/clean/wolf_rates.csv}; the temperature profile from KNMI
  * data (see Gotelli, "A Primer of Ecology", ch. 2 for logistic growth and ch. 5 for
  * competition). Values still unvalidated (climate sensitivities, grass width, wolf
- * predation) are marked with {@code // TODO: fit/look up}.
+ * predation, and all parameters of the seasonal grazing model) are marked with
+ * {@code // TODO: fit/look up}.
  */
 public final class ModelParameters {
 
@@ -170,6 +171,80 @@ public final class ModelParameters {
      */
     public double wolfMortality = 0.23;
 
+    // --- Seasonal grazing model (iteration 4, SeasonalGrazingModel). ---
+    /*
+     * Starting values are the provisional first estimates of the AgriculturalRiskFactors project
+     * (ovp-model, params/base_v0.1.json, Team 7), with their source text. None is calibrated yet:
+     * births, mortalities and the grass constants are to be fitted on the 1983-2015 counts
+     * (with grazingAreaHa = 1880), and winter starvation checked against
+     * data/clean/winter_mortality_nos.csv and the 2017-18 die-off.
+     */
+
+    /**
+     * Grazing area (ha) the grass in {@link SeasonalGrazingModel} grows on. Default 1080 ha:
+     * grassland left after rewetting and shelter woodland, Begeleidingscommissie beheer
+     * Oostvaardersplassen (Van Geel Committee, 2018), ch. 5, i.e. the situation today.
+     * Use 1880 ha (grazing area up to 2018, same report, ch. 2) when fitting on 1983-2017.
+     * Separate from {@link #areaHa} (5600 ha, the brief's figure for the whole reserve).
+     */
+    public double grazingAreaHa = 1080.0;
+
+    /** Maximum standing grass biomass, tonnes dry matter per ha. */
+    public double grassCapacityTPerHa = 4.0; // TODO: fit/look up (ARF provisional first estimate)
+
+    /**
+     * Grass growth rate r at the optimum temperature (GP = 1), per year. ARF chose 12/yr so that
+     * potential production is about 6 t DM/ha/yr.
+     */
+    public double grassGrowthRate = 12.0; // TODO: fit/look up (ARF provisional first estimate)
+
+    /** Grass level at which intake is half of maximum (G_h), tonnes dry matter per ha. */
+    public double grassHalfSaturationTPerHa = 0.6; // TODO: fit/look up (ARF provisional first estimate)
+
+    /** Die-back of standing grass outside the growing season, per year (scaled by 1 - GP). */
+    public double grassWinterDecay = 3.0; // TODO: fit/look up (ARF provisional first estimate)
+
+    /** Standing grass at t = 0 (1 January), as a fraction of capacity. ARF scenario value. */
+    public double initialGrassFraction = 0.3; // TODO: fit/look up
+
+    /**
+     * Maximum grass intake q_i per animal, tonnes dry matter per year, indexed by
+     * {@link Species#ordinal()}. The deer/cattle and deer/horses ratios (0.28 and 0.30) match
+     * the brief's 30 % effect of deer on cattle and horses.
+     */
+    public double[] intake = {
+        3.6, // CATTLE // TODO: fit/look up (ARF: about 10 kg DM per day)
+        3.3, // HORSES // TODO: fit/look up (ARF: about 9 kg DM per day)
+        1.0  // DEER   // TODO: fit/look up (ARF: about 2.7 kg DM per day)
+    };
+
+    /**
+     * Maximum per-capita birth rate b_i with ample food, per year, indexed by
+     * {@link Species#ordinal()}. Births happen in the growing season.
+     */
+    public double[] maxBirthRate = {
+        0.30, // CATTLE // TODO: fit/look up (ARF provisional first estimate)
+        0.25, // HORSES // TODO: fit/look up (ARF provisional first estimate)
+        0.40  // DEER   // TODO: fit/look up (ARF provisional first estimate)
+    };
+
+    /** Background mortality m_i, per year, indexed by {@link Species#ordinal()}. */
+    public double[] backgroundMortality = {
+        0.06, // CATTLE // TODO: fit/look up (ARF provisional first estimate)
+        0.05, // HORSES // TODO: fit/look up (ARF provisional first estimate)
+        0.08  // DEER   // TODO: fit/look up (ARF provisional first estimate)
+    };
+
+    /**
+     * Maximum extra mortality w_i in winter at zero food, per year, indexed by
+     * {@link Species#ordinal()}. To be calibrated on winter 2017-18 and the NOS winter deaths.
+     */
+    public double[] winterStarvationMortality = {
+        0.8, // CATTLE // TODO: fit/look up (ARF provisional first estimate)
+        0.8, // HORSES // TODO: fit/look up (ARF provisional first estimate)
+        1.2  // DEER   // TODO: fit/look up (ARF provisional first estimate)
+    };
+
     // --- Management events (culls, relocations, introductions, die-off). ---
 
     /**
@@ -220,6 +295,17 @@ public final class ModelParameters {
         this.handlingTime = src.handlingTime;
         this.conversionEfficiency = Arrays.copyOf(src.conversionEfficiency, N);
         this.wolfMortality = src.wolfMortality;
+
+        this.grazingAreaHa = src.grazingAreaHa;
+        this.grassCapacityTPerHa = src.grassCapacityTPerHa;
+        this.grassGrowthRate = src.grassGrowthRate;
+        this.grassHalfSaturationTPerHa = src.grassHalfSaturationTPerHa;
+        this.grassWinterDecay = src.grassWinterDecay;
+        this.initialGrassFraction = src.initialGrassFraction;
+        this.intake = Arrays.copyOf(src.intake, N);
+        this.maxBirthRate = Arrays.copyOf(src.maxBirthRate, N);
+        this.backgroundMortality = Arrays.copyOf(src.backgroundMortality, N);
+        this.winterStarvationMortality = Arrays.copyOf(src.winterStarvationMortality, N);
 
         this.startYear = src.startYear;
         this.events = List.copyOf(src.events);

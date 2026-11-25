@@ -4,6 +4,7 @@
 /Users/kornelkovacs/Inholland/year2/T1/Project application Development/Application/app/ProjectApplicationDevelopment/src/test/java/nl/ovp/model/GrassModelTest.java
 /Users/kornelkovacs/Inholland/year2/T1/Project application Development/Application/app/ProjectApplicationDevelopment/src/test/java/nl/ovp/model/ModelParametersTest.java
 /Users/kornelkovacs/Inholland/year2/T1/Project application Development/Application/app/ProjectApplicationDevelopment/src/test/java/nl/ovp/model/PredatorPreyModelTest.java
+/Users/kornelkovacs/Inholland/year2/T1/Project application Development/Application/app/ProjectApplicationDevelopment/src/test/java/nl/ovp/model/SeasonalGrazingModelTest.java
 /Users/kornelkovacs/Inholland/year2/T1/Project application Development/Application/app/ProjectApplicationDevelopment/src/test/java/nl/ovp/solver/RungeKutta4SolverTest.java
 /Users/kornelkovacs/Inholland/year2/T1/Project application Development/Application/app/ProjectApplicationDevelopment/src/test/java/nl/ovp/solver/SimulatorTest.java
 /Users/kornelkovacs/Inholland/year2/T1/Project application Development/Application/app/ProjectApplicationDevelopment/src/test/java/nl/ovp/ui/ParameterPanelTest.java

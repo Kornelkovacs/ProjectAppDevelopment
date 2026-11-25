@@ -34,18 +34,21 @@ scripts/
   fit_temperature_profile.py   fits meanAnnualTemperature / seasonalAmplitude to the climate data
   fit_parameters.py   fits growthRate / carryingCapacity / competitionAlpha to the counts (docs/CALIBRATION.md)
   plot_validation.py   docs/figures/validation.png, model (via the jar) vs observed counts
-  build_model_equations_pdf.py   rebuilds docs/MODEL_EQUATIONS.pdf from the current code (needs reportlab)
+  build_model_equations_pdf.py   rebuilds docs/MODEL_EQUATIONS.pdf from the current code (needs reportlab, a JDK)
+  build_application_guide_pdf.py   rebuilds docs/APPLICATION_GUIDE.pdf (the application, its history and the
+                  decisions behind it) and, first, MODEL_EQUATIONS.pdf, so its page references match
 ```
 
 ### Model layer
 
 - `PopulationModel` — interface every model implements: `name()`, `stateNames()`,
-  `initialState(ModelParameters)`, `derivatives(t, y, ModelParameters)`.
+  `initialState(ModelParameters)`, `derivatives(t, y, ModelParameters)`, and
+  optionally `maxStepYears()` (largest solver step the model tolerates).
 - `ModelRegistry` — lists every model so the GUI's dropdown and the CLI's
   `--model` index pick up new models automatically.
 - `Species` — enum `{CATTLE, HORSES, DEER}`; its ordinal is the index into every
   per-species array in `ModelParameters`, and matches the state-vector order
-  (cattle, horses, deer, optionally wolves) used throughout.
+  (cattle, horses, deer, then optionally wolves or grass) used throughout.
 - `ModelParameters` — every tunable number, in one place, with a deep `copy()`.
   Defaults match the policy target (300 cattle, 300 horses, 500 deer, 0 wolves);
   everything else is a placeholder marked `// TODO: fit/look up`, to be
@@ -55,8 +58,16 @@ scripts/
   competition for grass, climate-adjusted; the same plus wolves via a multi-prey
   Holling type II response). Each class's Javadoc gives the equation and the
   relevant chapter of Gotelli, *A Primer of Ecology*.
+- `SeasonalGrazingModel` (iteration 4, adapted from the AgriculturalRiskFactors
+  `GrazerModel`): grass is a state variable (tonnes dry matter on
+  `grazingAreaHa`, default 1,080 ha) that the three species eat with a Holling
+  type II feeding level. Grass growth and die-back follow the brief's
+  temperature-driven growth potential; births (summer) and starvation (winter)
+  follow a calendar season. Winter die-offs come out of the model instead of
+  being an input. All its parameters are provisional (`// TODO: fit/look up`).
 - `GrassModel` implements the grass growth-potential formula from Appendix 3 of
-  the project brief and feeds `CompetitionModel`'s climate scaling.
+  the project brief. It feeds `CompetitionModel`'s climate scaling and drives the
+  seasons of `SeasonalGrazingModel`.
 
 ### Solver layer
 
@@ -66,7 +77,9 @@ scripts/
 - `Simulator` — runs a model over `ModelParameters.horizonYears` at
   `ModelParameters.dtYears`, clamping any negative/NaN population to zero
   (extinction), and returns a `SimulationResult` (times, states, series names,
-  `finalState()`, `maxValue()`, `toCsv()`).
+  `finalState()`, `maxValue()`, `toCsv()`). If a model's `maxStepYears()` is
+  smaller than `dtYears`, each output step is split into equal internal steps
+  (`SeasonalGrazingModel`: about daily), while the result still has one row per `dtYears`.
 
 ### Data layer
 
@@ -101,11 +114,16 @@ java -jar target/app.jar                                  # launch the GUI
 java -jar target/app.jar --cli --years 20 --wolves 10      # headless, prints CSV to stdout
 ```
 
-CLI flags: `--model N` (index into `ModelRegistry.all()`, defaults to the most
-general model so `--wolves` always takes effect), `--wolves N`, `--dt X`
+CLI flags: `--model N` (index into `ModelRegistry.all()`: 0 logistic,
+1 competition, 2 seasonal grazing, 3 predator-prey; defaults to the most
+general model, predator-prey, so `--wolves` always takes effect), `--wolves N`, `--dt X`
 (years), `--years N`, `--replay YEAR` (start from the counts observed on 1 January
 of YEAR and apply the known culls, relocations and die-off from
-`data/clean/herbivore_events.csv`; `t = 0` is that date).
+`data/clean/herbivore_events.csv`; `t = 0` is that date). The replay is built for
+the competition model. With the seasonal grazing model it is misleading: the
+2017-18 die-off is then counted twice (as an event and as modelled starvation),
+the area stays at today's 1,080 ha, and the Moodle counts are autumn counts, not
+1 January counts (see `docs/ARF_MERGE_OVERVIEW.md`).
 
 To regenerate the cleaned CSVs from the raw spreadsheets:
 

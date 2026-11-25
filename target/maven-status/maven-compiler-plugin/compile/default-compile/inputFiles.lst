@@ -12,6 +12,7 @@
 /Users/kornelkovacs/Inholland/year2/T1/Project application Development/Application/app/ProjectApplicationDevelopment/src/main/java/nl/ovp/model/ModelRegistry.java
 /Users/kornelkovacs/Inholland/year2/T1/Project application Development/Application/app/ProjectApplicationDevelopment/src/main/java/nl/ovp/model/PopulationModel.java
 /Users/kornelkovacs/Inholland/year2/T1/Project application Development/Application/app/ProjectApplicationDevelopment/src/main/java/nl/ovp/model/PredatorPreyModel.java
+/Users/kornelkovacs/Inholland/year2/T1/Project application Development/Application/app/ProjectApplicationDevelopment/src/main/java/nl/ovp/model/SeasonalGrazingModel.java
 /Users/kornelkovacs/Inholland/year2/T1/Project application Development/Application/app/ProjectApplicationDevelopment/src/main/java/nl/ovp/model/Species.java
 /Users/kornelkovacs/Inholland/year2/T1/Project application Development/Application/app/ProjectApplicationDevelopment/src/main/java/nl/ovp/solver/EulerSolver.java
 /Users/kornelkovacs/Inholland/year2/T1/Project application Development/Application/app/ProjectApplicationDevelopment/src/main/java/nl/ovp/solver/OdeSolver.java

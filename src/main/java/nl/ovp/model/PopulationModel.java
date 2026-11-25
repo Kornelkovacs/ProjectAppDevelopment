@@ -32,4 +32,14 @@ public interface PopulationModel {
      * @return a new array, same length as {@code y}, that must not alias {@code y}
      */
     double[] derivatives(double t, double[] y, ModelParameters p);
+
+    /**
+     * Largest step (years) the solver may take for this model. If
+     * {@link ModelParameters#dtYears} is larger, {@link nl.ovp.solver.Simulator} splits each
+     * output step into equal internal steps no larger than this. The output stays at
+     * {@code dtYears}. Default: no limit, so one solver step per output step.
+     */
+    default double maxStepYears() {
+        return Double.POSITIVE_INFINITY;
+    }
 }

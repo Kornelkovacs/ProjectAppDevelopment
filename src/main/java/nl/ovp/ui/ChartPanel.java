@@ -15,6 +15,7 @@ import java.util.Map;
 import javax.swing.JPanel;
 
 import nl.ovp.data.HerbivoreCount;
+import nl.ovp.model.SeasonalGrazingModel;
 import nl.ovp.solver.SimulationResult;
 
 /**
@@ -22,6 +23,10 @@ import nl.ovp.solver.SimulationResult;
  * simulation series, a colour-blind friendly palette (Okabe &amp; Ito, 2008),
  * readable axis ticks, a legend showing each series' final value, and an
  * optional scatter overlay of observed herd counts.
+ * <p>
+ * The axis is in animals, so series in other units (the grass of
+ * {@link SeasonalGrazingModel}, in tonnes) are not drawn. Their final value is
+ * listed in the legend in grey, and the full series is in the CSV export.
  */
 public final class ChartPanel extends JPanel {
 
@@ -158,6 +163,9 @@ public final class ChartPanel extends JPanel {
 
         g2.setStroke(new BasicStroke(2.2f));
         for (int s = 0; s < seriesNames.length; s++) {
+            if (!isPlotted(seriesNames[s])) {
+                continue;
+            }
             g2.setColor(colorsBySeries[s]);
             int prevX = -1;
             int prevY = -1;
@@ -216,20 +224,31 @@ public final class ChartPanel extends JPanel {
         int lineHeight = 20;
         for (int s = 0; s < seriesNames.length; s++) {
             int ly = y + s * lineHeight;
-            g2.setColor(colorsBySeries[s]);
-            g2.fillRect(x, ly, 12, 12);
-            g2.setColor(Color.DARK_GRAY);
             double endValue = states.length > 0 ? states[states.length - 1][s] : 0.0;
             String label = String.format("%s (%.0f)", seriesNames[s], endValue);
+            if (isPlotted(seriesNames[s])) {
+                g2.setColor(colorsBySeries[s]);
+                g2.fillRect(x, ly, 12, 12);
+                g2.setColor(Color.DARK_GRAY);
+            } else {
+                g2.setColor(Color.GRAY); // value only, not drawn (other unit)
+            }
             g2.drawString(label, x + 18, ly + 11);
         }
+    }
+
+    /** True for series measured in animals; false for e.g. grass in tonnes. */
+    static boolean isPlotted(String seriesName) {
+        return !SeasonalGrazingModel.GRASS_SERIES.equals(seriesName);
     }
 
     private double maxAcrossAllSeries() {
         double max = 0.0;
         for (double[] state : states) {
-            for (double value : state) {
-                max = Math.max(max, value);
+            for (int s = 0; s < state.length; s++) {
+                if (isPlotted(seriesNames[s])) {
+                    max = Math.max(max, state[s]);
+                }
             }
         }
         if (observedCounts != null) {

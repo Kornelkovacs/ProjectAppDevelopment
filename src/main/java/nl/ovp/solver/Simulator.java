@@ -15,12 +15,19 @@ import nl.ovp.model.PopulationModel;
  * (numerical overshoot, or a genuine die-off) is clamped to zero: biologically,
  * a population cannot be negative, and once it reaches zero it is extinct and
  * stays at zero.
+ * <p>
+ * The result has one row per {@code dtYears}. If the model needs smaller steps
+ * ({@link PopulationModel#maxStepYears()}), each output step is split into
+ * {@code ceil(dtYears / maxStepYears)} equal solver steps. Clamping also happens
+ * after every one of those steps.
  */
 public final class Simulator {
 
     public SimulationResult run(PopulationModel model, OdeSolver solver, ModelParameters p) {
         double dt = p.dtYears;
         int steps = (int) Math.round(p.horizonYears / dt);
+        int substeps = Math.max(1, (int) Math.ceil(dt / model.maxStepYears() - 1e-9));
+        double h = dt / substeps;
 
         double[] y = model.initialState(p);
         clampExtinct(y);
@@ -32,8 +39,10 @@ public final class Simulator {
         states.add(y.clone());
 
         for (int i = 0; i < steps; i++) {
-            y = solver.step(model, t, y, dt, p);
-            clampExtinct(y);
+            for (int k = 0; k < substeps; k++) {
+                y = solver.step(model, t + k * h, y, h, p);
+                clampExtinct(y);
+            }
             t += dt;
             times.add(t);
             states.add(y.clone());

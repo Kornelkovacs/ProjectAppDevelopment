@@ -57,4 +57,44 @@ class SimulatorTest {
 
         assertEquals(5, result.times().length); // t = 0, 0.5, 1.0, 1.5, 2.0
     }
+
+    /** dy/dt = y, with a maximum step of 0.1 years. */
+    private static final PopulationModel GROWTH_WITH_MAX_STEP = new PopulationModel() {
+        @Override
+        public String name() {
+            return "exponential growth, max step 0.1";
+        }
+
+        @Override
+        public String[] stateNames() {
+            return new String[] {"X"};
+        }
+
+        @Override
+        public double[] initialState(ModelParameters p) {
+            return new double[] {1.0};
+        }
+
+        @Override
+        public double[] derivatives(double t, double[] y, ModelParameters p) {
+            return new double[] {y[0]};
+        }
+
+        @Override
+        public double maxStepYears() {
+            return 0.1;
+        }
+    };
+
+    @Test
+    void splitsOutputStepsIntoInternalStepsButRecordsOnlyOutputSteps() {
+        ModelParameters p = new ModelParameters();
+        p.dtYears = 0.5;
+        p.horizonYears = 1.0;
+
+        SimulationResult result = new Simulator().run(GROWTH_WITH_MAX_STEP, new EulerSolver(), p);
+
+        assertEquals(3, result.times().length); // t = 0, 0.5, 1.0
+        assertEquals(Math.pow(1.1, 10), result.finalState()[0], 1e-12); // 10 Euler steps of 0.1, not 2 of 0.5
+    }
 }
